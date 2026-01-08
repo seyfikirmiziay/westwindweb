@@ -114,8 +114,15 @@ export default function Planner({ auth }) {
             for (const client of selectedClients) {
                 if (client.users) {
                     for (const userClient of client.users) {
-                        if (!userIds.includes(userClient.user.id)) {
-                            userIds.push(userClient.user.id);
+                        // show_on_timeline false olanları filtrele
+                        if (
+                            userClient.user &&
+                            userClient.user.show_on_timeline !== false &&
+                            userClient.user.show_on_timeline !== 0
+                        ) {
+                            if (!userIds.includes(userClient.user.id)) {
+                                userIds.push(userClient.user.id);
+                            }
                         }
                     }
                 }
@@ -764,10 +771,16 @@ export default function Planner({ auth }) {
         await axios.get(route("users.show")).then((response) => {
             let newUserList = [];
             let newUserListForTime = [];
-            response.data.sort((a, b) =>
+            // show_on_timeline true olan kullanıcıları filtrele
+            const filteredUsers = response.data.filter(
+                (user) =>
+                    user.show_on_timeline !== false &&
+                    user.show_on_timeline !== 0
+            );
+            filteredUsers.sort((a, b) =>
                 a.driver_id.localeCompare(b.driver_id)
             );
-            response.data.map((user) => {
+            filteredUsers.map((user) => {
                 newUserList.push({ id: user.id, title: user.name, height: 50 });
                 newUserListForTime.push({
                     value: user.id,

@@ -707,6 +707,10 @@ export default function EditUser({ auth, user_id }) {
                                 user.accountant != null && user.accountant == 1
                                     ? true
                                     : false,
+                            show_on_timeline:
+                                user.show_on_timeline != null && user.show_on_timeline == 1
+                                    ? true
+                                    : false,
                         }}
                         //validationSchema={validationSchema}
                         onSubmit={(values, { setSubmitting, resetForm }) => {
@@ -988,6 +992,39 @@ export default function EditUser({ auth, user_id }) {
                                                     touched.is_retired && (
                                                         <p className="text-red-500">
                                                             *{errors.is_retired}
+                                                        </p>
+                                                    )}
+                                            </div>
+
+                                            <div className="mb-4 mx-4 w-1/3">
+                                                <label
+                                                    htmlFor="show_on_timeline"
+                                                    className="block text-sm font-medium text-gray-700"
+                                                >
+                                                    In Timeline anzeigen?
+                                                </label>
+                                                <ToggleSwitch
+                                                    label=""
+                                                    id="show_on_timeline"
+                                                    name="show_on_timeline"
+                                                    className="mb-4 mx-4"
+                                                    checked={
+                                                        values.show_on_timeline
+                                                            ? true
+                                                            : false
+                                                    }
+                                                    onChange={(e) => {
+                                                        setFieldValue(
+                                                            "show_on_timeline",
+                                                            e
+                                                        );
+                                                    }}
+                                                />
+
+                                                {errors.show_on_timeline &&
+                                                    touched.show_on_timeline && (
+                                                        <p className="text-red-500">
+                                                            *{errors.show_on_timeline}
                                                         </p>
                                                     )}
                                             </div>

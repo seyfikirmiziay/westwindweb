@@ -46,10 +46,10 @@ class RegisteredUserController extends Controller
         $users = User::get();
         return response()->json($users);
     }
-    
+
     public function api_all()
     {
-        $users = User::select('name','id')->where('is_admin', 0)->where('is_active', 1)->where('leave_working_date', null)->get();
+        $users = User::select('name', 'id')->where('is_admin', 0)->where('is_active', 1)->where('leave_working_date', null)->get();
         return response()->json($users);
     }
 
@@ -67,11 +67,11 @@ class RegisteredUserController extends Controller
 
     public function show_user($user_id)
     {
-        $user = User::where('id',$user_id)->first();
+        $user = User::where('id', $user_id)->first();
 
         $salaryService = new SalaryService();
         $salary = $salaryService->getSalaryAtDate($user, now()->toDateString());
-        $user->salary = $salary->salary ?? $user->salary; 
+        $user->salary = $salary->salary ?? $user->salary;
         return response()->json($user);
     }
     /**
@@ -84,7 +84,7 @@ class RegisteredUserController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -164,34 +164,34 @@ class RegisteredUserController extends Controller
 
 
         event(new UserRegistered($user));
-        return response()->json(['success'=>true, 'message' => 'User created successfully']);
+        return response()->json(['success' => true, 'message' => 'User created successfully']);
     }
 
     public function edit_inside(Request $request)
     {
-        $user = User::where('id',$request->id)->first();
-        if($request->password != null){
+        $user = User::where('id', $request->id)->first();
+        if ($request->password != null) {
             $request->merge(['password' => Hash::make($request->password)]);
-        } else{
+        } else {
             $request->merge(['password' => $user->password]);
         }
-        
+
         $start = Carbon::createFromDate($request->start_working_date);
         $data['start_working_date'] = $start->format('Y-m-d');
 
         $salaryService = new SalaryService();
         $salary = $salaryService->getSalaryAtDate($user, now()->toDateString());
-        if($salary->salary ?? $user->salary != $request->salary){
-            if(!$salary){
+        if ($salary->salary ?? $user->salary != $request->salary) {
+            if (!$salary) {
                 $salaryService->updateSalary($user, $user->salary, $user->start_working_date);
                 $salaryService->updateSalary($user, $request->salary, now()->toDateString());
-            }else{
+            } else {
                 $salaryService->updateSalary($user, $request->salary, now()->toDateString());
             }
         }
         $request->merge($data);
         $user->update($request->all());
-        return response()->json(['success'=>true, 'message' => 'User updated successfully']);
+        return response()->json(['success' => true, 'message' => 'User updated successfully']);
     }
 
     public function leave_jobs(Request $request)
@@ -200,33 +200,33 @@ class RegisteredUserController extends Controller
         $user->leave_working_date = Carbon::now()->format('Y-m-d');
         $user->is_active = 0;
         $user->save();
-        return response()->json(['success'=>true, 'message' => 'User left the job successfully']);
+        return response()->json(['success' => true, 'message' => 'User left the job successfully']);
     }
 
 
-    public function add_user_clients (Request $request,$user_id)
+    public function add_user_clients(Request $request, $user_id)
     {
-        $user = User::where('id',$user_id)->first();
-        $client = Client::where('id',$request->client_id)->first();
+        $user = User::where('id', $user_id)->first();
+        $client = Client::where('id', $request->client_id)->first();
         $user_client = new UsersClient();
         $user_client->user_id = $user->id;
         $user_client->client_id = $client->id;
         $user_client->save();
-        return response()->json(['success'=>true, 'message' => 'User clients added successfully']);
+        return response()->json(['success' => true, 'message' => 'User clients added successfully']);
     }
 
-    public function delete_user_clients (Request $request,$user_id,$client_id)
+    public function delete_user_clients(Request $request, $user_id, $client_id)
     {
-        $user = User::where('id',$user_id)->first();
-        $client = Client::where('id',$request->client_id)->first();
-        $user_client = UsersClient::where('user_id',$user->id)->where('client_id',$client->id)->first();
+        $user = User::where('id', $user_id)->first();
+        $client = Client::where('id', $request->client_id)->first();
+        $user_client = UsersClient::where('user_id', $user->id)->where('client_id', $client->id)->first();
         $user_client->delete();
-        return response()->json(['success'=>true, 'message' => 'User clients removed successfully']);
+        return response()->json(['success' => true, 'message' => 'User clients removed successfully']);
     }
 
-    public function show_user_clients ($user_id)
+    public function show_user_clients($user_id)
     {
-        $user = User::where('id',$user_id)->first();
+        $user = User::where('id', $user_id)->first();
         $user_clients = $user->userClients;
         return response()->json($user_clients);
     }

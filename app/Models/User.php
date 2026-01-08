@@ -78,6 +78,7 @@ class User extends Authenticatable implements JWTSubject
         'apartment',
         'tax_id',
         'accountant',
+        'show_on_timeline',
     ];
 
 
@@ -233,4 +234,3 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(UserSalary::class);
     }
 }
-
