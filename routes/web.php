@@ -32,6 +32,8 @@ use App\Http\Controllers\JobNotesController;
 use App\Http\Controllers\GPSLocationController;
 use App\Http\Controllers\ToDoController;
 use App\Http\Controllers\StationController;
+use App\Http\Controllers\HotelController;
+use Illuminate\Http\Request;
 
 use App\Events\UserRegistered;
 
@@ -65,6 +67,13 @@ Route::get('/admin/bahn-cards', function () {
 Route::get('/admin/aggreements', function () {
     return Inertia::render('Admin/Aggreements/Index');
 })->middleware(['auth', 'verified'])->name('aggreements.view');
+
+Route::get('/admin/hotels/history', function () {
+    return Inertia::render('Admin/Hotels/History');
+})->middleware(['auth', 'verified'])->name('hotels.history');
+
+Route::get('/hotels', [HotelController::class, 'index'])->middleware(['auth', 'verified'])->name('hotels.index');
+Route::post('/hotels', [HotelController::class, 'store'])->middleware(['auth', 'verified'])->name('hotels.store');
 
 Route::get('/admin/aggreements/create', function () {
     return Inertia::render('Admin/Aggreements/Create');
@@ -212,10 +221,10 @@ Route::post('/upload', [FileUploadController::class, 'upload'])->middleware(['au
 
 Route::get('/data-unconfirmed-jobs', [FinalizedJobsController::class, 'unconfirmed_jobs'])->middleware(['auth', 'verified'])->withoutMiddleware([IsAdmin::class])->name('data-unconfirmed-jobs');
 Route::get('/data-confirmed-jobs', [FinalizedJobsController::class, 'confirmed_jobs'])->middleware(['auth', 'verified'])->withoutMiddleware([IsAdmin::class])->name('data-confirmed-jobs');
-Route::post('/jobs-editing', [FinalizedJobsController::class, 'edit'])->middleware(['auth', 'verified',IsAdmin::class])->name('jobs-editing');
-Route::post('/jobs-confirmation', [FinalizedJobsController::class, 'confirm_jobs'])->middleware(['auth', 'verified',IsAdmin::class])->name('jobs-confirmation');
+Route::post('/jobs-editing', [FinalizedJobsController::class, 'edit'])->middleware(['auth', 'verified', IsAdmin::class])->name('jobs-editing');
+Route::post('/jobs-confirmation', [FinalizedJobsController::class, 'confirm_jobs'])->middleware(['auth', 'verified', IsAdmin::class])->name('jobs-confirmation');
 Route::get('/admin/wait-confirmed-jobs-count', [FinalizedJobsController::class, 'wait_confirmed_jobs'])->middleware(['auth', 'verified', IsAdmin::class])->name('wait-confirmed-jobs-count');
-Route::get('/admin/show-user/{user_id}', [RegisteredUserController::class, 'show_user'])->middleware(['auth', 'verified',IsAdmin::class])->name('user.show');
+Route::get('/admin/show-user/{user_id}', [RegisteredUserController::class, 'show_user'])->middleware(['auth', 'verified', IsAdmin::class])->name('user.show');
 
 Route::get('/todo', [ToDoController::class, 'index'])->middleware(['auth', 'verified'])->name('todo');
 Route::get('/get-weekly-todos', [ToDoController::class, 'get_weekly_todos'])->middleware(['auth', 'verified'])->name('get-weekly-todos');
@@ -224,90 +233,90 @@ Route::put('/todo/{id}', [ToDoController::class, 'update'])->middleware(['auth',
 Route::delete('/todo/{id}', [ToDoController::class, 'destroy'])->middleware(['auth', 'verified'])->name('todo.destroy');
 
 
-Route::get('/stationsa', [StationController::class, 'index'])->middleware(['auth', 'verified'])->withoutMiddleware([IsAdmin::class])->name('stations');  
-Route::get('/stations/{id}', [StationController::class, 'show'])->middleware(['auth', 'verified'])->withoutMiddleware([IsAdmin::class])->name('stations.show');  
+Route::get('/stationsa', [StationController::class, 'index'])->middleware(['auth', 'verified'])->withoutMiddleware([IsAdmin::class])->name('stations');
+Route::get('/stations/{id}', [StationController::class, 'show'])->middleware(['auth', 'verified'])->withoutMiddleware([IsAdmin::class])->name('stations.show');
 Route::get('/stations-search', [StationController::class, 'search'])->middleware(['auth', 'verified'])->withoutMiddleware([IsAdmin::class])->name('stations-search');
 
 
 Route::get('/professions', [ProfessionsController::class, 'index'])->middleware(['auth', 'verified'])->withoutMiddleware([IsAdmin::class])->name('professions');
-Route::post('/professions', [ProfessionsController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('professions-store');
-Route::post('/add-user-profession/{user_id}', [ProfessionsController::class, 'add_user_profession'])->middleware(['auth', 'verified',IsAdmin::class])->name('add-user-profession');
-Route::get('/get-user-professions/{user_id}', [ProfessionsController::class, 'show'])->middleware(['auth', 'verified',IsAdmin::class])->name('get-user-professions');
-Route::delete('/delete-user-professions/{user_id}/{profession_id}', [ProfessionsController::class, 'delete_user_profession'])->middleware(['auth', 'verified',IsAdmin::class])->name('delete-user-professions');
+Route::post('/professions', [ProfessionsController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('professions-store');
+Route::post('/add-user-profession/{user_id}', [ProfessionsController::class, 'add_user_profession'])->middleware(['auth', 'verified', IsAdmin::class])->name('add-user-profession');
+Route::get('/get-user-professions/{user_id}', [ProfessionsController::class, 'show'])->middleware(['auth', 'verified', IsAdmin::class])->name('get-user-professions');
+Route::delete('/delete-user-professions/{user_id}/{profession_id}', [ProfessionsController::class, 'delete_user_profession'])->middleware(['auth', 'verified', IsAdmin::class])->name('delete-user-professions');
 
-Route::post('/add-user-clients/{user_id}', [RegisteredUserController::class,  'add_user_clients'])->middleware(['auth', 'verified',IsAdmin::class])->name('add-user-clients');
-Route::get('/get-user-clients/{user_id}', [RegisteredUserController::class, 'show_user_clients'])->middleware(['auth', 'verified',IsAdmin::class])->name('get-user-clients');
-Route::get('/get-clients-users', [RegisteredUserController::class, 'get_clients_users'])->middleware(['auth', 'verified',IsAdmin::class])->name('get-clients-users');
-Route::delete('/delete-user-clients/{user_id}/{client_id}', [RegisteredUserController::class, 'delete_user_clients'])->middleware(['auth', 'verified',IsAdmin::class])->name('delete-user-clients');
-
-
-
-
-
-Route::get('/agreements', [AggreementController::class, 'index'])->middleware(['auth', 'verified',IsAdmin::class])->name('aggreements');
-Route::get('/agreements/{id}', [AggreementController::class, 'show'])->middleware(['auth', 'verified',IsAdmin::class])->name('aggreements.show');
-Route::post('/agreements', [AggreementController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('aggreements.store');
-Route::put('/agreements/{id}', [AggreementController::class, 'update'])->middleware(['auth', 'verified',IsAdmin::class])->name('aggreements.update');
-Route::delete('/agreements/{id}', [AggreementController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('aggreements.destroy');
-
-
-Route::get('/programs', [ProgramController::class, 'index'])->middleware(['auth', 'verified',IsAdmin::class])->name('programs');
-Route::get('/user-programs/{user_id}', [ProgramController::class, 'user_programs'])->middleware(['auth', 'verified',IsAdmin::class])->name('user.programs');
-Route::post('/programs', [ProgramController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('programs.store');
-Route::post('/user-programs/{user_id}', [ProgramController::class, 'user_programs_store'])->middleware(['auth', 'verified',IsAdmin::class])->name('user.programs.store');
-Route::get('/programs/{id}', [ProgramController::class, 'show'])->middleware(['auth', 'verified',IsAdmin::class])->name('programs.show');
-Route::put('/programs/{id}', [ProgramController::class, 'update'])->middleware(['auth', 'verified',IsAdmin::class])->name('programs.update');
-Route::delete('/programs/{id}', [ProgramController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('programs.destroy');
-Route::delete('/user-programs/{id}', [ProgramController::class, 'user_programs_destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('user.programs.destroy');
+Route::post('/add-user-clients/{user_id}', [RegisteredUserController::class,  'add_user_clients'])->middleware(['auth', 'verified', IsAdmin::class])->name('add-user-clients');
+Route::get('/get-user-clients/{user_id}', [RegisteredUserController::class, 'show_user_clients'])->middleware(['auth', 'verified', IsAdmin::class])->name('get-user-clients');
+Route::get('/get-clients-users', [RegisteredUserController::class, 'get_clients_users'])->middleware(['auth', 'verified', IsAdmin::class])->name('get-clients-users');
+Route::delete('/delete-user-clients/{user_id}/{client_id}', [RegisteredUserController::class, 'delete_user_clients'])->middleware(['auth', 'verified', IsAdmin::class])->name('delete-user-clients');
 
 
 
 
 
+Route::get('/agreements', [AggreementController::class, 'index'])->middleware(['auth', 'verified', IsAdmin::class])->name('aggreements');
+Route::get('/agreements/{id}', [AggreementController::class, 'show'])->middleware(['auth', 'verified', IsAdmin::class])->name('aggreements.show');
+Route::post('/agreements', [AggreementController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('aggreements.store');
+Route::put('/agreements/{id}', [AggreementController::class, 'update'])->middleware(['auth', 'verified', IsAdmin::class])->name('aggreements.update');
+Route::delete('/agreements/{id}', [AggreementController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('aggreements.destroy');
 
-Route::get('/certificates', [CertificateController::class, 'index'])->middleware(['auth', 'verified',IsAdmin::class])->name('certificates');
-Route::get('/certificates-get', [CertificateController::class, 'getCertificates'])->middleware(['auth', 'verified',IsAdmin::class])->name('certificates-get');
-Route::get('/certificates/create', [CertificateController::class, 'create'])->middleware(['auth', 'verified',IsAdmin::class])->name('certificates.create');
-Route::post('/certificates', [CertificateController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('certificates.store');
-Route::get('/certificates/{id}', [CertificateController::class, 'show'])->middleware(['auth', 'verified',IsAdmin::class])->name('certificates.show');
-Route::get('/certificates/edit/{id}', [CertificateController::class, 'edit'])->middleware(['auth', 'verified',IsAdmin::class])->name('certificates.edit');
-Route::put('/certificates/{id}', [CertificateController::class, 'update'])->middleware(['auth', 'verified',IsAdmin::class])->name('certificates.update');
-Route::delete('/certificates/{id}', [CertificateController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('certificates.destroy');
+
+Route::get('/programs', [ProgramController::class, 'index'])->middleware(['auth', 'verified', IsAdmin::class])->name('programs');
+Route::get('/user-programs/{user_id}', [ProgramController::class, 'user_programs'])->middleware(['auth', 'verified', IsAdmin::class])->name('user.programs');
+Route::post('/programs', [ProgramController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('programs.store');
+Route::post('/user-programs/{user_id}', [ProgramController::class, 'user_programs_store'])->middleware(['auth', 'verified', IsAdmin::class])->name('user.programs.store');
+Route::get('/programs/{id}', [ProgramController::class, 'show'])->middleware(['auth', 'verified', IsAdmin::class])->name('programs.show');
+Route::put('/programs/{id}', [ProgramController::class, 'update'])->middleware(['auth', 'verified', IsAdmin::class])->name('programs.update');
+Route::delete('/programs/{id}', [ProgramController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('programs.destroy');
+Route::delete('/user-programs/{id}', [ProgramController::class, 'user_programs_destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('user.programs.destroy');
 
 
 
 
 
 
-Route::get('/get-user-certificates/{user_id}', [UserCertificateController::class, 'index'])->middleware(['auth', 'verified',IsAdmin::class])->name('get-user-certificates');
-Route::post('/user-certificates', [UserCertificateController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('user.certificate.store');
-Route::delete('/user-certificates/{id}', [UserCertificateController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('user.certificate.destroy');
+Route::get('/certificates', [CertificateController::class, 'index'])->middleware(['auth', 'verified', IsAdmin::class])->name('certificates');
+Route::get('/certificates-get', [CertificateController::class, 'getCertificates'])->middleware(['auth', 'verified', IsAdmin::class])->name('certificates-get');
+Route::get('/certificates/create', [CertificateController::class, 'create'])->middleware(['auth', 'verified', IsAdmin::class])->name('certificates.create');
+Route::post('/certificates', [CertificateController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('certificates.store');
+Route::get('/certificates/{id}', [CertificateController::class, 'show'])->middleware(['auth', 'verified', IsAdmin::class])->name('certificates.show');
+Route::get('/certificates/edit/{id}', [CertificateController::class, 'edit'])->middleware(['auth', 'verified', IsAdmin::class])->name('certificates.edit');
+Route::put('/certificates/{id}', [CertificateController::class, 'update'])->middleware(['auth', 'verified', IsAdmin::class])->name('certificates.update');
+Route::delete('/certificates/{id}', [CertificateController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('certificates.destroy');
 
 
-Route::get('/get-user-agreements/{user_id}', [UsersAggreementsController::class, 'index'])->middleware(['auth', 'verified',IsAdmin::class])->name('get-user-agreements');
-Route::post('/user-agreements', [UsersAggreementsController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('user.agreement.store');
-Route::delete('/user-agreements/{id}', [UsersAggreementsController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('user.agreement.destroy');
+
+
+
+
+Route::get('/get-user-certificates/{user_id}', [UserCertificateController::class, 'index'])->middleware(['auth', 'verified', IsAdmin::class])->name('get-user-certificates');
+Route::post('/user-certificates', [UserCertificateController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('user.certificate.store');
+Route::delete('/user-certificates/{id}', [UserCertificateController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('user.certificate.destroy');
+
+
+Route::get('/get-user-agreements/{user_id}', [UsersAggreementsController::class, 'index'])->middleware(['auth', 'verified', IsAdmin::class])->name('get-user-agreements');
+Route::post('/user-agreements', [UsersAggreementsController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('user.agreement.store');
+Route::delete('/user-agreements/{id}', [UsersAggreementsController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('user.agreement.destroy');
 
 
 Route::get('/finalized-filter', [FinalizedJobsController::class, 'get_filters'])->middleware(['auth', 'verified'])->withoutMiddleware([IsAdmin::class])->name('finalized-filter');
 Route::get('/admin/finalized-jobs', [FinalizedJobsController::class, 'index']);
-Route::post('/admin/register_inside', [RegisteredUserController::class, 'store_inside'])->middleware(['auth', 'verified',IsAdmin::class])->name('register.inside');
-Route::post('/admin/edit_inside', [RegisteredUserController::class, 'edit_inside'])->middleware(['auth', 'verified',IsAdmin::class])->name('edit.inside');
+Route::post('/admin/register_inside', [RegisteredUserController::class, 'store_inside'])->middleware(['auth', 'verified', IsAdmin::class])->name('register.inside');
+Route::post('/admin/edit_inside', [RegisteredUserController::class, 'edit_inside'])->middleware(['auth', 'verified', IsAdmin::class])->name('edit.inside');
 
-Route::get('/admin/all-bahn-cards', [BahnCardController::class, 'index'])->middleware(['auth', 'verified',IsAdmin::class])->name('all-bahn-cards');
-Route::get('/admin/all-bahn-cards/{id}', [BahnCardController::class, 'show'])->middleware(['auth', 'verified',IsAdmin::class])->name('bahn-cards-show');
-Route::get('/admin/user-bahn-cards/{user_id}', [BahnCardController::class, 'show_user_bahn_cards'])->middleware(['auth', 'verified',IsAdmin::class])->name('bahn-cards-show-user');
-Route::post('/admin/bahn-cards', [BahnCardController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('bahn-cards-store');
-Route::delete('/admin/bahn-cards/{id}', [BahnCardController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('bahn-cards-destroy');
-Route::put('/admin/bahn-cards/{id}', [BahnCardController::class, 'update'])->middleware(['auth', 'verified',IsAdmin::class])->name('bahn-cards-update');
+Route::get('/admin/all-bahn-cards', [BahnCardController::class, 'index'])->middleware(['auth', 'verified', IsAdmin::class])->name('all-bahn-cards');
+Route::get('/admin/all-bahn-cards/{id}', [BahnCardController::class, 'show'])->middleware(['auth', 'verified', IsAdmin::class])->name('bahn-cards-show');
+Route::get('/admin/user-bahn-cards/{user_id}', [BahnCardController::class, 'show_user_bahn_cards'])->middleware(['auth', 'verified', IsAdmin::class])->name('bahn-cards-show-user');
+Route::post('/admin/bahn-cards', [BahnCardController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('bahn-cards-store');
+Route::delete('/admin/bahn-cards/{id}', [BahnCardController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('bahn-cards-destroy');
+Route::put('/admin/bahn-cards/{id}', [BahnCardController::class, 'update'])->middleware(['auth', 'verified', IsAdmin::class])->name('bahn-cards-update');
 
-Route::get('/planner/jobs', [JobPlansController::class, 'index'])->middleware(['auth', 'verified',IsAdmin::class])->name('planner-jobs');
-Route::get('/planner/jobs/without-user', [JobPlansController::class, 'index_without_user'])->middleware(['auth', 'verified',IsAdmin::class])->name('planner-jobs-without-user');
-Route::get('/planner/jobs/show/{id}', [JobPlansController::class, 'show'])->middleware(['auth', 'verified',IsAdmin::class])->name('planner-jobs-show');
-Route::post('/planner/jobs', [JobPlansController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('planner-jobs-store');
-Route::put('/planner/jobs/update/{job}', [JobPlansController::class, 'update'])->middleware(['auth', 'verified',IsAdmin::class])->name('planner-jobs-update');
-Route::put('/planner/jobs/{id}', [JobPlansController::class, 'leave_job'])->middleware(['auth', 'verified',IsAdmin::class])->name('planner-jobs-leave');
-Route::delete('/planner/jobs', [JobPlansController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('planner-jobs-destroy');
+Route::get('/planner/jobs', [JobPlansController::class, 'index'])->middleware(['auth', 'verified', IsAdmin::class])->name('planner-jobs');
+Route::get('/planner/jobs/without-user', [JobPlansController::class, 'index_without_user'])->middleware(['auth', 'verified', IsAdmin::class])->name('planner-jobs-without-user');
+Route::get('/planner/jobs/show/{id}', [JobPlansController::class, 'show'])->middleware(['auth', 'verified', IsAdmin::class])->name('planner-jobs-show');
+Route::post('/planner/jobs', [JobPlansController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('planner-jobs-store');
+Route::put('/planner/jobs/update/{job}', [JobPlansController::class, 'update'])->middleware(['auth', 'verified', IsAdmin::class])->name('planner-jobs-update');
+Route::put('/planner/jobs/{id}', [JobPlansController::class, 'leave_job'])->middleware(['auth', 'verified', IsAdmin::class])->name('planner-jobs-leave');
+Route::delete('/planner/jobs', [JobPlansController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('planner-jobs-destroy');
 Route::get('/planner/jobs/get-users-jobs', [JobPlansController::class, 'get_users_jobs'])->middleware(['auth', 'verified'])->name('get-users-jobs');
 
 
@@ -341,11 +350,11 @@ Route::post('/user-leave-jobs', [RegisteredUserController::class, 'leave_jobs'])
 //Route::get('/planner/jobs/get-user-jobs', [JobPlansController::class, 'get_user_job_plans'])->middleware(['auth', 'verified'])->name('get-user-job-plans');
 Route::delete('/jobs-unconfirmed', [FinalizedJobsController::class, 'destroy'])->middleware(['auth', 'verified'])->name('jobs-unconfirmed-destroy');
 
-Route::get('/admin/clients', [ClientController::class, 'index'])->middleware(['auth', 'verified',IsAdmin::class])->name('admin-clients');
-Route::post('/admin/clients', [ClientController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('admin-clients-store');
-Route::delete('/admin/clients/{id}', [ClientController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('admin-clients-destroy');
-Route::get('/admin/clients/{id}', [ClientController::class, 'show'])->middleware(['auth', 'verified',IsAdmin::class])->name('admin-clients-show');
-Route::put('/admin/clients/{id}', [ClientController::class, 'update'])->middleware(['auth', 'verified',IsAdmin::class])->name('admin-clients-update');
+Route::get('/admin/clients', [ClientController::class, 'index'])->middleware(['auth', 'verified', IsAdmin::class])->name('admin-clients');
+Route::post('/admin/clients', [ClientController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('admin-clients-store');
+Route::delete('/admin/clients/{id}', [ClientController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('admin-clients-destroy');
+Route::get('/admin/clients/{id}', [ClientController::class, 'show'])->middleware(['auth', 'verified', IsAdmin::class])->name('admin-clients-show');
+Route::put('/admin/clients/{id}', [ClientController::class, 'update'])->middleware(['auth', 'verified', IsAdmin::class])->name('admin-clients-update');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->withoutMiddleware([IsAdmin::class])->name('profile.edit');
@@ -359,30 +368,29 @@ Route::middleware('auth')->group(function () {
     Route::post('/finalized-jobs/export-client-pdf', [FinalizedJobsController::class, 'get_finalized_client_pdf'])->withoutMiddleware([IsAdmin::class])->name('get-finalized-client-pdf');
     Route::get('/download-pdf/{filename}', [PdfController::class, 'downloadPdf'])->withoutMiddleware([IsAdmin::class])->name('download.pdf');
     Route::get('/planner/jobs/get-user-jobs', [JobPlansController::class, 'get_user_job_plans'])->withoutMiddleware([IsAdmin::class])->name('get-user-job-plans');
-
 });
 
 Route::get('/get_user_bonus/{user_id}', [UsersBonusController::class, 'show'])->middleware(['auth', 'verified'])->name('get-user-bonus');
-Route::post('/add-bonus/{user_id}', [UsersBonusController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('add-bonus');
-Route::delete('/delete-bonus/{bonus_id}', [UsersBonusController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('delete-bonus');
+Route::post('/add-bonus/{user_id}', [UsersBonusController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('add-bonus');
+Route::delete('/delete-bonus/{bonus_id}', [UsersBonusController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('delete-bonus');
 
 Route::get('user-salary-reports/{user_id}', [UserSalaryReportController::class, 'index'])->name('user.salary.show');
 Route::post('user-salary-reports', [UserSalaryReportController::class, 'store'])->name('user.salary.store');
 Route::delete('user-salary-reports/{id}', [UserSalaryReportController::class, 'destroy'])->name('user.salary.destroy');
 
 Route::get('/get_user_advances/{user_id}', [UsersAdvanceController::class, 'show'])->middleware(['auth', 'verified'])->name('get-user-advances');
-Route::post('/add-advances/{user_id}', [UsersAdvanceController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('add-advances');
-Route::delete('/delete-advances/{advances_id}', [UsersAdvanceController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('delete-advances');
+Route::post('/add-advances/{user_id}', [UsersAdvanceController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('add-advances');
+Route::delete('/delete-advances/{advances_id}', [UsersAdvanceController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('delete-advances');
 
 Route::get('/hour-banks/{user_id}', [HourBankController::class, 'index'])->middleware(['auth', 'verified'])->name('hour-banks');
-Route::post('/add-hour-bank/{user_id}', [HourBankController::class, 'store'])->middleware(['auth', 'verified',IsAdmin::class])->name('add-hour-bank');
-Route::delete('/delete-hour-bank/{hour_bank_id}', [HourBankController::class, 'destroy'])->middleware(['auth', 'verified',IsAdmin::class])->name('delete-hour-bank');
-Route::get('/hour-banks/{user_id}', [HourBankController::class, 'index'])->middleware(['auth', 'verified',IsAdmin::class])->name('get-user-hour-banks');
+Route::post('/add-hour-bank/{user_id}', [HourBankController::class, 'store'])->middleware(['auth', 'verified', IsAdmin::class])->name('add-hour-bank');
+Route::delete('/delete-hour-bank/{hour_bank_id}', [HourBankController::class, 'destroy'])->middleware(['auth', 'verified', IsAdmin::class])->name('delete-hour-bank');
+Route::get('/hour-banks/{user_id}', [HourBankController::class, 'index'])->middleware(['auth', 'verified', IsAdmin::class])->name('get-user-hour-banks');
 
 
 
-Route::get('/gps-locations', [GPSLocationController::class, 'index'])->withoutMiddleware([IsAdmin::class,'auth', 'verified'])->name('gps-locations');
-Route::put('/gps-locations', [GPSLocationController::class, 'store'])->withoutMiddleware([IsAdmin::class,'auth', 'verified'])->name('gps-locations-store');
+Route::get('/gps-locations', [GPSLocationController::class, 'index'])->withoutMiddleware([IsAdmin::class, 'auth', 'verified'])->name('gps-locations');
+Route::put('/gps-locations', [GPSLocationController::class, 'store'])->withoutMiddleware([IsAdmin::class, 'auth', 'verified'])->name('gps-locations-store');
 /*Route::put('/gps-locations', function() {
     dd('deneme');
 })->withoutMiddleware([IsAdmin::class,'auth', 'verified'])->name('gps-locations-store');*/
@@ -391,7 +399,7 @@ Route::get('/gps-locations/{id}', [GPSLocationController::class, 'show'])->middl
 Route::put('/gps-locations/{id}', [GPSLocationController::class, 'update'])->middleware(['auth', 'verified'])->name('gps-locations-update');
 Route::delete('/gps-locations/{id}', [GPSLocationController::class, 'destroy'])->middleware(['auth', 'verified'])->name('gps-locations-destroy');
 
-Route::get('/testroute', function() {
+Route::get('/testroute', function () {
     $name = "Funny Coder";
     Mail::to('samimcanboke@hotmail.com')->send(new MyTestEmail($name));
 });
@@ -403,14 +411,14 @@ Route::get('/test-email', function () {
     $asd = Mail::to($user->email)->send(new WelcomeMail($user));
     dd($asd);
     return 'Mail sent!';
-})->withoutMiddleware(['auth', 'verified',IsAdmin::class]);
+})->withoutMiddleware(['auth', 'verified', IsAdmin::class]);
 
 Route::get('/trigger-event', function () {
     $user = \App\Models\User::first(); // Örneğin ilk kullanıcı
     $a = event(new UserRegistered($user));
     dd($a);
     return 'Event triggered!';
-})->withoutMiddleware(['auth', 'verified',IsAdmin::class]);
+})->withoutMiddleware(['auth', 'verified', IsAdmin::class]);
 
 Route::get('/check-certificates', function () {
     $expiredCertificates = \App\Models\UserCertificate::whereRaw('DATE_SUB(validity_date, INTERVAL reminder_day DAY) <= CURDATE()')->get();
@@ -428,4 +436,4 @@ Route::get('/check-bahn-cards', function () {
 
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
