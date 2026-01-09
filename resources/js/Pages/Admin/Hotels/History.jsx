@@ -253,7 +253,7 @@ export default function HotelsHistory({ auth }) {
     const loadTourOptions = async (inputValue) => {
         try {
             const response = await axios.get("/hotels/tour-names", {
-                params: { search: inputValue },
+                params: { search: inputValue || "" },
             });
             return response.data;
         } catch (error) {

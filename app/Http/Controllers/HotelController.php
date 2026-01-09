@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\User;
 use App\Models\FinalizedJobs;
 use App\Models\JobPlans;
+use App\Models\DraftJobs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -155,8 +156,11 @@ class HotelController extends Controller
                 ->pluck('tour_name');
             $tourNames = $tourNames->merge($finalizedTours);
         } else {
+            // İlk yüklemede limit 5
             $finalizedTours = FinalizedJobs::whereNotNull('tour_name')
                 ->distinct()
+                ->orderBy('tour_name', 'asc')
+                ->limit(5)
                 ->pluck('tour_name');
             $tourNames = $tourNames->merge($finalizedTours);
         }
@@ -169,14 +173,39 @@ class HotelController extends Controller
                 ->pluck('tour_name');
             $tourNames = $tourNames->merge($jobPlanTours);
         } else {
+            // İlk yüklemede limit 5
             $jobPlanTours = JobPlans::whereNotNull('tour_name')
                 ->distinct()
+                ->orderBy('tour_name', 'asc')
+                ->limit(5)
                 ->pluck('tour_name');
             $tourNames = $tourNames->merge($jobPlanTours);
         }
 
+        // DraftJobs (taslak işler) tablosundan tour name'leri al
+        if ($search) {
+            $draftTours = DraftJobs::whereNotNull('tour_name')
+                ->where('tour_name', 'like', '%' . $search . '%')
+                ->distinct()
+                ->pluck('tour_name');
+            $tourNames = $tourNames->merge($draftTours);
+        } else {
+            // İlk yüklemede limit 5
+            $draftTours = DraftJobs::whereNotNull('tour_name')
+                ->distinct()
+                ->orderBy('tour_name', 'asc')
+                ->limit(5)
+                ->pluck('tour_name');
+            $tourNames = $tourNames->merge($draftTours);
+        }
+
         // Tekrarları kaldır ve sırala
         $uniqueTours = $tourNames->unique()->sort()->values();
+
+        // İlk yüklemede (search boşken) maksimum 5 tane göster
+        if (!$search) {
+            $uniqueTours = $uniqueTours->take(5);
+        }
 
         // React Select formatına çevir
         $formattedTours = $uniqueTours->map(function ($tourName) {
