@@ -11,7 +11,10 @@ class Hotel extends Model
         'client_id',
         'user_id',
         'hotel_name',
-        'address',
+        'tour_name',
+        'price',
+        'check_in_date',
+        'check_out_date',
         'notes',
         'invoice_file',
     ];

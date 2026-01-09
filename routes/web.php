@@ -74,6 +74,7 @@ Route::get('/admin/hotels/history', function () {
 
 Route::get('/hotels', [HotelController::class, 'index'])->middleware(['auth', 'verified'])->name('hotels.index');
 Route::post('/hotels', [HotelController::class, 'store'])->middleware(['auth', 'verified'])->name('hotels.store');
+Route::get('/hotels/tour-names', [HotelController::class, 'getTourNames'])->middleware(['auth', 'verified'])->name('hotels.tour-names');
 
 Route::get('/admin/aggreements/create', function () {
     return Inertia::render('Admin/Aggreements/Create');

@@ -12,6 +12,8 @@ import {
     Table,
 } from "flowbite-react";
 import { useDropzone } from "react-dropzone";
+import AsyncSelect from "react-select/async";
+import axios from "axios";
 import Swal from "sweetalert2";
 
 export default function HotelsHistory({ auth }) {
@@ -30,16 +32,21 @@ export default function HotelsHistory({ auth }) {
     });
     const [errors, setErrors] = useState({});
     const [data, setData] = useState([]);
+    const [totalPrice, setTotalPrice] = useState(0);
 
     // Form state for adding hotel
     const [hotelForm, setHotelForm] = useState({
         client_id: "",
         user_id: "",
         hotel_name: "",
-        address: "",
+        tour_name: "",
+        price: "",
+        check_in_date: "",
+        check_out_date: "",
         notes: "",
         invoice_file: "",
     });
+    const [selectedTour, setSelectedTour] = useState(null);
     const [invoiceFile, setInvoiceFile] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -140,6 +147,7 @@ export default function HotelsHistory({ auth }) {
                 setIsSubmitting(false);
                 if (res.data.status) {
                     setData(res.data.data);
+                    setTotalPrice(res.data.total_price || 0);
                     setFilterView(false);
                 } else {
                     Swal.fire({
@@ -242,6 +250,32 @@ export default function HotelsHistory({ auth }) {
         }
     };
 
+    const loadTourOptions = async (inputValue) => {
+        try {
+            const response = await axios.get("/hotels/tour-names", {
+                params: { search: inputValue },
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error loading tour names:", error);
+            return [];
+        }
+    };
+
+    const handleTourChange = (selectedOption) => {
+        setSelectedTour(selectedOption);
+        setHotelForm((prev) => ({
+            ...prev,
+            tour_name: selectedOption ? selectedOption.value : "",
+        }));
+        if (formErrors.tour_name) {
+            setFormErrors((prev) => ({
+                ...prev,
+                tour_name: "",
+            }));
+        }
+    };
+
     const handleFormSubmit = (e) => {
         e.preventDefault();
         setFormErrors({});
@@ -273,10 +307,14 @@ export default function HotelsHistory({ auth }) {
                         client_id: "",
                         user_id: "",
                         hotel_name: "",
-                        address: "",
+                        tour_name: "",
+                        price: "",
+                        check_in_date: "",
+                        check_out_date: "",
                         notes: "",
                         invoice_file: "",
                     });
+                    setSelectedTour(null);
                     setInvoiceFile(null);
                 }
             })
@@ -559,6 +597,25 @@ export default function HotelsHistory({ auth }) {
                                             </Button>
                                             {data && data.length > 0 ? (
                                                 <div className="overflow-x-auto">
+                                                    {totalPrice > 0 && (
+                                                        <div className="mb-4">
+                                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                                                <p className="text-lg font-semibold text-blue-800">
+                                                                    Gesamtpreis
+                                                                    (Tarih
+                                                                    Aralığı):{" "}
+                                                                    {totalPrice.toLocaleString(
+                                                                        "de-DE",
+                                                                        {
+                                                                            minimumFractionDigits: 2,
+                                                                            maximumFractionDigits: 2,
+                                                                        }
+                                                                    )}{" "}
+                                                                    €
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                     <Table striped>
                                                         <Table.Head>
                                                             <Table.HeadCell>
@@ -574,7 +631,16 @@ export default function HotelsHistory({ auth }) {
                                                                 Hotelname
                                                             </Table.HeadCell>
                                                             <Table.HeadCell>
-                                                                Adresse
+                                                                Tourname
+                                                            </Table.HeadCell>
+                                                            <Table.HeadCell>
+                                                                Check-in
+                                                            </Table.HeadCell>
+                                                            <Table.HeadCell>
+                                                                Check-out
+                                                            </Table.HeadCell>
+                                                            <Table.HeadCell>
+                                                                Preis
                                                             </Table.HeadCell>
                                                             <Table.HeadCell>
                                                                 Notiz
@@ -620,9 +686,41 @@ export default function HotelsHistory({ auth }) {
                                                                             {hotel.hotel_name ||
                                                                                 "-"}
                                                                         </Table.Cell>
-                                                                        <Table.Cell className="max-w-xs truncate">
-                                                                            {hotel.address ||
+                                                                        <Table.Cell>
+                                                                            {hotel.tour_name ||
                                                                                 "-"}
+                                                                        </Table.Cell>
+                                                                        <Table.Cell>
+                                                                            {hotel.check_in_date
+                                                                                ? new Date(
+                                                                                      hotel.check_in_date
+                                                                                  ).toLocaleDateString(
+                                                                                      "de-DE"
+                                                                                  )
+                                                                                : "-"}
+                                                                        </Table.Cell>
+                                                                        <Table.Cell>
+                                                                            {hotel.check_out_date
+                                                                                ? new Date(
+                                                                                      hotel.check_out_date
+                                                                                  ).toLocaleDateString(
+                                                                                      "de-DE"
+                                                                                  )
+                                                                                : "-"}
+                                                                        </Table.Cell>
+                                                                        <Table.Cell>
+                                                                            {hotel.price
+                                                                                ? parseFloat(
+                                                                                      hotel.price
+                                                                                  ).toLocaleString(
+                                                                                      "de-DE",
+                                                                                      {
+                                                                                          minimumFractionDigits: 2,
+                                                                                          maximumFractionDigits: 2,
+                                                                                      }
+                                                                                  ) +
+                                                                                  " €"
+                                                                                : "-"}
                                                                         </Table.Cell>
                                                                         <Table.Cell className="max-w-xs truncate">
                                                                             {hotel.notes ||
@@ -763,18 +861,71 @@ export default function HotelsHistory({ auth }) {
                                             />
                                         </div>
                                         <div>
+                                            <Label value="Tourname (Optional)" />
+                                            <AsyncSelect
+                                                cacheOptions
+                                                defaultOptions
+                                                loadOptions={loadTourOptions}
+                                                value={selectedTour}
+                                                onChange={handleTourChange}
+                                                placeholder="Tourname suchen..."
+                                                noOptionsMessage={() =>
+                                                    "Keine Tournamen gefunden"
+                                                }
+                                                loadingMessage={() => "Lädt..."}
+                                                isClearable
+                                            />
+                                        </div>
+                                        <div>
                                             <Label
-                                                htmlFor="address"
-                                                value="Adresse (Optional)"
+                                                htmlFor="price"
+                                                value="Preis (Optional)"
                                             />
-                                            <Textarea
-                                                id="address"
-                                                name="address"
-                                                value={hotelForm.address}
+                                            <TextInput
+                                                id="price"
+                                                name="price"
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                value={hotelForm.price}
                                                 onChange={handleFormChange}
-                                                placeholder="Adresse"
-                                                rows={3}
+                                                placeholder="0.00"
                                             />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <Label
+                                                    htmlFor="check_in_date"
+                                                    value="Check-in Datum (Optional)"
+                                                />
+                                                <TextInput
+                                                    id="check_in_date"
+                                                    name="check_in_date"
+                                                    type="date"
+                                                    value={
+                                                        hotelForm.check_in_date
+                                                    }
+                                                    onChange={handleFormChange}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label
+                                                    htmlFor="check_out_date"
+                                                    value="Check-out Datum (Optional)"
+                                                />
+                                                <TextInput
+                                                    id="check_out_date"
+                                                    name="check_out_date"
+                                                    type="date"
+                                                    value={
+                                                        hotelForm.check_out_date
+                                                    }
+                                                    onChange={handleFormChange}
+                                                    min={
+                                                        hotelForm.check_in_date
+                                                    }
+                                                />
+                                            </div>
                                         </div>
                                         <div>
                                             <Label
