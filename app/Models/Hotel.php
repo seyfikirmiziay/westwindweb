@@ -17,6 +17,7 @@ class Hotel extends Model
         'check_out_date',
         'notes',
         'invoice_file',
+        'is_deleted',
     ];
 
     public function client(): BelongsTo
@@ -27,5 +28,10 @@ class Hotel extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeNotDeleted($query)
+    {
+        return $query->where('is_deleted', false);
     }
 }

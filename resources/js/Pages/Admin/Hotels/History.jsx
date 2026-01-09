@@ -634,10 +634,10 @@ export default function HotelsHistory({ auth }) {
                                                                 Tourname
                                                             </Table.HeadCell>
                                                             <Table.HeadCell>
-                                                                Check-in
+                                                                Anreise-Datum
                                                             </Table.HeadCell>
                                                             <Table.HeadCell>
-                                                                Check-out
+                                                                Abreise-Datum
                                                             </Table.HeadCell>
                                                             <Table.HeadCell>
                                                                 Preis
@@ -647,6 +647,9 @@ export default function HotelsHistory({ auth }) {
                                                             </Table.HeadCell>
                                                             <Table.HeadCell>
                                                                 Rechnung
+                                                            </Table.HeadCell>
+                                                            <Table.HeadCell>
+                                                                Aktion
                                                             </Table.HeadCell>
                                                         </Table.Head>
                                                         <Table.Body className="divide-y">
@@ -741,6 +744,121 @@ export default function HotelsHistory({ auth }) {
                                                                             ) : (
                                                                                 "-"
                                                                             )}
+                                                                        </Table.Cell>
+                                                                        <Table.Cell>
+                                                                            <Button
+                                                                                size="xs"
+                                                                                color="failure"
+                                                                                onClick={() => {
+                                                                                    Swal.fire(
+                                                                                        {
+                                                                                            title: "Sind Sie sicher?",
+                                                                                            text: "Möchten Sie diesen Eintrag wirklich löschen?",
+                                                                                            icon: "warning",
+                                                                                            showCancelButton: true,
+                                                                                            confirmButtonColor:
+                                                                                                "#d33",
+                                                                                            cancelButtonColor:
+                                                                                                "#3085d6",
+                                                                                            confirmButtonText:
+                                                                                                "Ja, löschen!",
+                                                                                            cancelButtonText:
+                                                                                                "Abbrechen",
+                                                                                        }
+                                                                                    ).then(
+                                                                                        (
+                                                                                            result
+                                                                                        ) => {
+                                                                                            if (
+                                                                                                result.isConfirmed
+                                                                                            ) {
+                                                                                                axios
+                                                                                                    .delete(
+                                                                                                        `/hotels/${hotel.id}`
+                                                                                                    )
+                                                                                                    .then(
+                                                                                                        () => {
+                                                                                                            Swal.fire(
+                                                                                                                "Gelöscht!",
+                                                                                                                "Der Eintrag wurde gelöscht.",
+                                                                                                                "success"
+                                                                                                            );
+                                                                                                            // Veriyi yenile - mevcut filtrelerle tekrar yükle
+                                                                                                            if (
+                                                                                                                !filterView
+                                                                                                            ) {
+                                                                                                                axios
+                                                                                                                    .get(
+                                                                                                                        "/hotels",
+                                                                                                                        {
+                                                                                                                            params: {
+                                                                                                                                user_id:
+                                                                                                                                    filter.user,
+                                                                                                                                client_id:
+                                                                                                                                    filter.client,
+                                                                                                                                week: filter.week,
+                                                                                                                                month: filter.month,
+                                                                                                                                year: filter.year,
+                                                                                                                            },
+                                                                                                                        }
+                                                                                                                    )
+                                                                                                                    .then(
+                                                                                                                        (
+                                                                                                                            res
+                                                                                                                        ) => {
+                                                                                                                            if (
+                                                                                                                                res
+                                                                                                                                    .data
+                                                                                                                                    .status
+                                                                                                                            ) {
+                                                                                                                                setData(
+                                                                                                                                    res
+                                                                                                                                        .data
+                                                                                                                                        .data
+                                                                                                                                );
+                                                                                                                                setTotalPrice(
+                                                                                                                                    res
+                                                                                                                                        .data
+                                                                                                                                        .total_price ||
+                                                                                                                                        0
+                                                                                                                                );
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    )
+                                                                                                                    .catch(
+                                                                                                                        (
+                                                                                                                            err
+                                                                                                                        ) => {
+                                                                                                                            console.error(
+                                                                                                                                err
+                                                                                                                            );
+                                                                                                                        }
+                                                                                                                    );
+                                                                                                            }
+                                                                                                        }
+                                                                                                    )
+                                                                                                    .catch(
+                                                                                                        (
+                                                                                                            err
+                                                                                                        ) => {
+                                                                                                            Swal.fire(
+                                                                                                                "Fehler!",
+                                                                                                                err
+                                                                                                                    .response
+                                                                                                                    ?.data
+                                                                                                                    ?.message ||
+                                                                                                                    "Ein Fehler ist aufgetreten",
+                                                                                                                "error"
+                                                                                                            );
+                                                                                                        }
+                                                                                                    );
+                                                                                            }
+                                                                                        }
+                                                                                    );
+                                                                                }}
+                                                                            >
+                                                                                Löschen
+                                                                            </Button>
                                                                         </Table.Cell>
                                                                     </Table.Row>
                                                                 )
@@ -896,7 +1014,7 @@ export default function HotelsHistory({ auth }) {
                                             <div>
                                                 <Label
                                                     htmlFor="check_in_date"
-                                                    value="Check-in Datum (Optional)"
+                                                    value="Anreise-Datum (Optional)"
                                                 />
                                                 <TextInput
                                                     id="check_in_date"
@@ -911,7 +1029,7 @@ export default function HotelsHistory({ auth }) {
                                             <div>
                                                 <Label
                                                     htmlFor="check_out_date"
-                                                    value="Check-out Datum (Optional)"
+                                                    value="Abreise-Datum (Optional)"
                                                 />
                                                 <TextInput
                                                     id="check_out_date"

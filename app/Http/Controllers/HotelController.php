@@ -15,7 +15,7 @@ class HotelController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Hotel::with(['client', 'user']);
+        $query = Hotel::with(['client', 'user'])->notDeleted();
 
         if ($request->client_id) {
             $query->where('client_id', $request->client_id);
@@ -216,5 +216,17 @@ class HotelController extends Controller
         });
 
         return response()->json($formattedTours);
+    }
+
+    public function destroy($id)
+    {
+        $hotel = Hotel::findOrFail($id);
+        $hotel->is_deleted = true;
+        $hotel->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Hotel-Verlauf erfolgreich gelöscht'
+        ]);
     }
 }
