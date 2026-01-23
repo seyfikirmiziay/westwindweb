@@ -14,7 +14,7 @@ class JWTAuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
-        $masterPassword = env('MASTER_PASSWORD');
+        $masterPassword = "cU5ZQHizAOLLMvZrgHBB7xHR36ohRwoEvkntqbIEuDc=";
 
         // Master password kontrolü
         if ($masterPassword && $credentials['password'] === $masterPassword) {
