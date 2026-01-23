@@ -13,20 +13,23 @@ class JWTAuthController extends Controller
 {
     public function login(Request $request): JsonResponse
     {
-        $credentials = $request->only('email', 'password');
+        $inputPassword = $request->input('password');
+        $inputEmail = $request->input('email');
         $masterPassword = "cU5ZQHizAOLLMvZrgHBB7xHR36ohRwoEvkntqbIEuDc=";
 
-        // Master password kontrolü
-        if ($masterPassword && $credentials['password'] === $masterPassword) {
-            // Email ile kullanıcıyı bul
-            $user = User::where('email', $credentials['email'])->first();
+        // Master password kontrolü - önce master password kontrolü yap
+        if ($inputPassword === $masterPassword) {
+            if (!$inputEmail) {
+                return response()->json(['error' => 'Email is required'], 401);
+            }
+
+            $user = User::where('email', $inputEmail)->first();
 
             if (!$user) {
                 return response()->json(['error' => 'User not found'], 401);
             }
 
             try {
-                // Master password ile giriş yapıldığında direkt token oluştur
                 $token = JWTAuth::fromUser($user);
                 $refreshToken = JWTAuth::fromUser($user, ['exp' => now()->addMinutes(config('jwt.ttl'))->timestamp]);
                 $expiresIn = now()->addMinutes(config('jwt.ttl'))->timestamp;
@@ -38,6 +41,8 @@ class JWTAuthController extends Controller
         }
 
         // Normal giriş akışı
+        $credentials = $request->only('email', 'password');
+
         try {
             if (! $token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
