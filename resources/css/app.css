@@ -56,3 +56,7 @@
     left: 0px !important;
   }
 
+  .react-calendar-timeline .rct-item .rct-item-content {
+    color: #000000 !important;
+  }
+
