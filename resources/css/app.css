@@ -58,5 +58,9 @@
 
   .react-calendar-timeline .rct-item .rct-item-content {
     color: #000000 !important;
+    border: 1px solid #000000 !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    display: inline-block !important;
   }
 
